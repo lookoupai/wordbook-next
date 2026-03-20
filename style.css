@@ -1,0 +1,15 @@
+/*
+Theme Name: Wordbook Next Preview 2
+Theme URI: https://heji.ltd/
+Author: Site Team
+Description: 面向文档站的现代经典 WordPress 主题，保留 Wordbook 的阅读体验并兼容新版 WordPress。
+Requires at least: 6.7
+Tested up to: 6.7.2
+Requires PHP: 7.4
+Version: 0.1.2-preview
+Text Domain: wordbook-next
+*/
+
+body {
+	margin: 0;
+}
