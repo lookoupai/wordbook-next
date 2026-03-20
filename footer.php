@@ -1,8 +1,8 @@
 		</main>
 
-		<footer class="wb-footer">
-			<div class="wb-footer__inner">
-				<div class="wb-footer__text"><?php echo wp_kses_post( wordbook_next_get_footer_text() ); ?></div>
+			<footer class="wb-footer">
+				<div class="wb-footer__inner">
+					<div class="wb-footer__text"><?php echo wp_kses_post( wordbook_next_get_footer_text() ); ?></div>
 
 				<?php
 				if ( has_nav_menu( 'footer' ) ) {
@@ -16,11 +16,21 @@
 						)
 					);
 				}
-				?>
-			</div>
-		</footer>
+					?>
+				</div>
+			</footer>
+
+			<button
+				type="button"
+				class="wb-backtotop"
+				data-wb-action="scroll-top"
+				aria-label="<?php esc_attr_e( '返回顶部', 'wordbook-next' ); ?>"
+				hidden
+			>
+				<span aria-hidden="true">↑</span>
+			</button>
+		</div>
 	</div>
-</div>
-<?php wp_footer(); ?>
+	<?php wp_footer(); ?>
 </body>
 </html>

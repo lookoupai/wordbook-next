@@ -1431,6 +1431,47 @@ mark {
 	color: var(--wb-muted);
 }
 
+.wb-backtotop {
+	position: fixed;
+	right: clamp(0.8rem, 2vw, 1.35rem);
+	bottom: clamp(0.8rem, 2vw, 1.35rem);
+	z-index: 30;
+	width: 3rem;
+	height: 3rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 1px solid var(--wb-border-strong);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.92);
+	color: var(--wb-text);
+	box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+	backdrop-filter: blur(10px);
+	cursor: pointer;
+	opacity: 0;
+	transform: translateY(10px);
+	pointer-events: none;
+	transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.wb-backtotop.is-visible {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+
+.wb-backtotop:hover,
+.wb-backtotop:focus-visible {
+	border-color: var(--wb-accent);
+	background: rgba(203, 131, 50, 0.12);
+}
+
+.wb-backtotop span {
+	font-size: 1.05rem;
+	line-height: 1;
+}
+
 body.admin-bar .wb-topbar {
 	top: 32px;
 }
@@ -1551,6 +1592,13 @@ body.admin-bar .wb-sidebar {
 		padding: 0.95rem 0.75rem 3.25rem;
 	}
 
+	.wb-backtotop {
+		right: 0.75rem;
+		bottom: 0.85rem;
+		width: 2.7rem;
+		height: 2.7rem;
+	}
+
 	.wb-search-panel {
 		grid-template-columns: 1fr;
 		padding: 0.95rem;
@@ -1614,6 +1662,13 @@ body.admin-bar .wb-sidebar {
 
 	.wb-content {
 		padding: 0.55rem 0.35rem 3rem;
+	}
+
+	.wb-backtotop {
+		right: 0.55rem;
+		bottom: 0.7rem;
+		width: 2.45rem;
+		height: 2.45rem;
 	}
 
 	.wb-entry__content .alignwide {

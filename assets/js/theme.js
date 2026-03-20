@@ -4,6 +4,7 @@
 	const body = document.body;
 	const overlay = document.querySelector( '[data-wb-overlay]' );
 	const navToggle = document.querySelector( '[data-wb-action="toggle-nav"]' );
+	const backToTop = document.querySelector( '[data-wb-action="scroll-top"]' );
 	const sidebar = document.querySelector( '[data-wb-sidebar]' );
 	const mainContent = document.querySelector( '[data-wb-main]' );
 	const drawerMedia = window.matchMedia( '(max-width: 980px)' );
@@ -245,6 +246,16 @@
 		}
 	}
 
+	function syncBackToTopVisibility() {
+		if ( ! backToTop ) {
+			return;
+		}
+
+		const shouldShow = window.scrollY > 480 && ! body.classList.contains( 'wb-nav-open' );
+		backToTop.hidden = ! shouldShow;
+		backToTop.classList.toggle( 'is-visible', shouldShow );
+	}
+
 	document.addEventListener( 'click', function( event ) {
 		const actionTarget = event.target.closest( '[data-wb-action]' );
 
@@ -252,12 +263,15 @@
 			return;
 		}
 
-		switch ( actionTarget.dataset.wbAction ) {
-			case 'toggle-nav':
-				toggleNavigation();
-				break;
-			case 'toggle-theme':
-				cycleSetting( 'theme' );
+			switch ( actionTarget.dataset.wbAction ) {
+				case 'toggle-nav':
+					toggleNavigation();
+					break;
+				case 'scroll-top':
+					window.scrollTo( { top: 0, behavior: 'smooth' } );
+					break;
+				case 'toggle-theme':
+					cycleSetting( 'theme' );
 				break;
 			case 'toggle-font':
 				cycleSetting( 'font' );
@@ -282,6 +296,8 @@
 	if ( overlay ) {
 		overlay.addEventListener( 'click', closeNavigation );
 	}
+
+	window.addEventListener( 'scroll', syncBackToTopVisibility, { passive: true } );
 
 	document.addEventListener( 'keydown', function( event ) {
 		if ( 'Escape' === event.key && body.classList.contains( 'wb-nav-open' ) ) {
@@ -312,4 +328,5 @@
 
 	applySettings();
 	handleDrawerModeChange();
+	syncBackToTopVisibility();
 }() );
