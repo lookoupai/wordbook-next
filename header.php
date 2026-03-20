@@ -10,7 +10,7 @@
 <a class="screen-reader-text skip-link" href="#primary"><?php esc_html_e( '跳转到正文', 'wordbook-next' ); ?></a>
 <div class="wb-site-shell">
 	<div class="wb-site-shell__overlay" data-wb-overlay hidden></div>
-	<aside class="wb-sidebar" id="wb-sidebar" aria-label="<?php esc_attr_e( '文档导航', 'wordbook-next' ); ?>">
+	<aside class="wb-sidebar" id="wb-sidebar" aria-label="<?php esc_attr_e( '文档导航', 'wordbook-next' ); ?>" data-wb-sidebar tabindex="-1">
 		<div class="wb-sidebar__inner">
 			<div class="wb-brand">
 				<?php wordbook_next_render_brand(); ?>
@@ -27,9 +27,9 @@
 				>
 			</form>
 
-			<nav class="wb-doc-nav" aria-label="<?php esc_attr_e( '章节目录', 'wordbook-next' ); ?>">
-				<?php
-				wp_nav_menu(
+				<nav class="wb-doc-nav" aria-label="<?php esc_attr_e( '章节目录', 'wordbook-next' ); ?>" data-wb-doc-tree>
+					<?php
+					wp_nav_menu(
 					array(
 						'theme_location' => wordbook_next_get_docs_menu_location(),
 						'container'      => false,
@@ -37,20 +37,39 @@
 						'depth'          => 3,
 						'fallback_cb'    => 'wordbook_next_fallback_docs_menu',
 					)
-				);
-				?>
-			</nav>
+					);
+					?>
+				</nav>
 
-			<?php if ( wordbook_next_get_sidebar_notice() ) : ?>
-				<div class="wb-sidebar__note"><?php echo wp_kses_post( wordbook_next_get_sidebar_notice() ); ?></div>
-			<?php endif; ?>
-		</div>
-	</aside>
+				<div class="wb-sidebar__footer">
+					<?php if ( wordbook_next_has_utility_menu() ) : ?>
+						<nav class="wb-utility-nav" aria-label="<?php esc_attr_e( '功能导航', 'wordbook-next' ); ?>">
+							<?php
+							wp_nav_menu(
+								array(
+									'theme_location' => 'utility',
+									'container'      => false,
+									'menu_class'     => 'wb-utility-nav__list',
+									'depth'          => 1,
+								)
+							);
+							?>
+						</nav>
+					<?php endif; ?>
 
-	<div class="wb-main">
-		<header class="wb-topbar">
-			<button
-				class="wb-topbar__toggle"
+					<?php wordbook_next_render_reading_controls( 'wb-reading-controls--sidebar' ); ?>
+
+					<?php if ( wordbook_next_get_sidebar_notice() ) : ?>
+						<div class="wb-sidebar__note"><?php echo wp_kses_post( wordbook_next_get_sidebar_notice() ); ?></div>
+					<?php endif; ?>
+				</div>
+			</div>
+		</aside>
+
+		<div class="wb-main" data-wb-main>
+			<header class="wb-topbar">
+				<button
+					class="wb-topbar__toggle"
 				type="button"
 				data-wb-action="toggle-nav"
 				aria-controls="wb-sidebar"
@@ -61,12 +80,7 @@
 
 			<div class="wb-topbar__title"><?php echo esc_html( wordbook_next_get_view_title() ); ?></div>
 
-			<div class="wb-reading-controls" aria-label="<?php esc_attr_e( '阅读设置', 'wordbook-next' ); ?>">
-				<button type="button" data-wb-action="decrease-font"><?php esc_html_e( 'A-', 'wordbook-next' ); ?></button>
-				<button type="button" data-wb-action="increase-font"><?php esc_html_e( 'A+', 'wordbook-next' ); ?></button>
-				<button type="button" data-wb-action="toggle-font"><?php esc_html_e( '字形', 'wordbook-next' ); ?></button>
-				<button type="button" data-wb-action="toggle-theme"><?php esc_html_e( '主题', 'wordbook-next' ); ?></button>
-			</div>
-		</header>
+				<?php wordbook_next_render_reading_controls( 'wb-reading-controls--topbar' ); ?>
+				</header>
 
-		<main id="primary" class="wb-content" role="main">
+			<main id="primary" class="wb-content" role="main">

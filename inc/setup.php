@@ -41,8 +41,10 @@ if ( ! function_exists( 'wordbook_next_setup' ) ) {
 
 		register_nav_menus(
 			array(
-				'main'   => __( '文档导航', 'wordbook-next' ),
-				'footer' => __( '页脚导航', 'wordbook-next' ),
+				'docs'    => __( '文档导航', 'wordbook-next' ),
+				'main'    => __( '旧版目录导航', 'wordbook-next' ),
+				'utility' => __( '功能导航', 'wordbook-next' ),
+				'footer'  => __( '页脚导航', 'wordbook-next' ),
 			)
 		);
 	}

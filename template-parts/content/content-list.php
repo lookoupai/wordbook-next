@@ -1,14 +1,5 @@
 <?php
-$type_object = get_post_type_object( get_post_type() );
-$label       = $type_object ? $type_object->labels->singular_name : __( '内容', 'wordbook-next' );
-
-if ( 'post' === get_post_type() ) {
-	$categories = get_the_category();
-
-	if ( ! empty( $categories ) ) {
-		$label = $categories[0]->name;
-	}
-}
+$label = wordbook_next_get_result_label( get_the_ID() );
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'wb-list-entry' ); ?>>
