@@ -9,21 +9,21 @@
 			"defaultGradients": false,
 			"defaultPalette": false,
 			"palette": [
-				{
-					"slug": "canvas",
-					"name": "Canvas",
-					"color": "#F7F2E7"
-				},
+					{
+						"slug": "canvas",
+						"name": "Canvas",
+						"color": "#FFFFFF"
+					},
 				{
 					"slug": "contrast",
 					"name": "Contrast",
 					"color": "#1F2430"
 				},
-				{
-					"slug": "sidebar",
-					"name": "Sidebar",
-					"color": "#0F1520"
-				},
+					{
+						"slug": "sidebar",
+						"name": "Sidebar",
+						"color": "#F6F7F9"
+					},
 				{
 					"slug": "accent",
 					"name": "Accent",
@@ -39,11 +39,11 @@
 					"name": "Link",
 					"color": "#235FA8"
 				},
-				{
-					"slug": "paper",
-					"name": "Paper",
-					"color": "#FFFDF8"
-				}
+					{
+						"slug": "paper",
+						"name": "Paper",
+						"color": "#FFFFFF"
+					}
 			]
 		},
 		"layout": {

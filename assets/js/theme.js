@@ -8,12 +8,12 @@
 	const mainContent = document.querySelector( '[data-wb-main]' );
 	const drawerMedia = window.matchMedia( '(max-width: 980px)' );
 	const states = {
-		theme: [ 'light', 'sepia', 'night' ],
+		theme: [ 'white', 'sepia', 'night' ],
 		font: [ 'sans', 'serif' ],
 		scale: [ 0, 1, 2, 3, 4 ]
 	};
 	const defaults = {
-		theme: 'light',
+		theme: 'white',
 		font: 'sans',
 		scale: 2
 	};
