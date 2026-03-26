@@ -46,6 +46,100 @@ function wordbook_next_trim_meta_description( $text, $width = 200 ) {
 	return trim( substr( $text, 0, $width ) );
 }
 
+function wordbook_next_get_seo_description_meta_key() {
+	return '_wordbook_next_seo_description';
+}
+
+function wordbook_next_is_weak_meta_description_segment( $text ) {
+	$text = wordbook_next_normalize_meta_text( $text );
+
+	if ( '' === $text ) {
+		return true;
+	}
+
+	if ( preg_match( '/^(?:目录|内容目录|显示|toc|table of contents)$/iu', $text ) ) {
+		return true;
+	}
+
+	if ( preg_match( '/^[\d\W_]+$/u', $text ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+function wordbook_next_get_meta_text_width( $text ) {
+	$text = (string) $text;
+
+	if ( function_exists( 'mb_strwidth' ) ) {
+		return mb_strwidth( $text, 'UTF-8' );
+	}
+
+	return strlen( $text );
+}
+
+function wordbook_next_get_generated_meta_description_from_content( $content, $width = 200 ) {
+	if ( function_exists( 'excerpt_remove_blocks' ) ) {
+		$content = excerpt_remove_blocks( (string) $content );
+	}
+
+	$content = strip_shortcodes( (string) $content );
+	$content = preg_replace( '/<(?:br|hr)\s*\/?>/iu', "\n", $content );
+	$content = preg_replace( '/<\/(?:p|div|li|ul|ol|blockquote|section|article|h[1-6]|table|tr|td)>/iu', "\n", $content );
+	$lines   = preg_split( '/[\r\n]+/', (string) $content );
+
+	if ( ! is_array( $lines ) ) {
+		return wordbook_next_trim_meta_description( $content, $width );
+	}
+
+	$summary = '';
+
+	foreach ( $lines as $line ) {
+		$line = wordbook_next_normalize_meta_text( $line );
+
+		if ( wordbook_next_is_weak_meta_description_segment( $line ) ) {
+			continue;
+		}
+
+		if ( '' === $summary && wordbook_next_get_meta_text_width( $line ) >= 14 ) {
+			return wordbook_next_trim_meta_description( $line, $width );
+		}
+
+		$summary = '' === $summary ? $line : $summary . ' ' . $line;
+		$summary = wordbook_next_trim_meta_description( $summary, $width );
+
+		if ( wordbook_next_get_meta_text_width( $summary ) >= $width ) {
+			break;
+		}
+	}
+
+	if ( '' !== $summary ) {
+		return $summary;
+	}
+
+	return wordbook_next_trim_meta_description( $content, $width );
+}
+
+function wordbook_next_get_generated_post_meta_description( $post = null ) {
+	$post = get_post( $post );
+
+	if ( ! $post instanceof WP_Post ) {
+		return '';
+	}
+
+	$summary = wordbook_next_trim_meta_description( $post->post_excerpt );
+
+	if ( '' === $summary ) {
+		$summary = wordbook_next_get_generated_meta_description_from_content( $post->post_content );
+	}
+
+	if ( '' !== $summary ) {
+		return $summary;
+	}
+
+	return wordbook_next_trim_meta_description( get_bloginfo( 'description' ) );
+}
+
 function wordbook_next_get_custom_meta_description( $post = null ) {
 	$post = get_post( $post );
 
@@ -54,6 +148,7 @@ function wordbook_next_get_custom_meta_description( $post = null ) {
 	}
 
 	$meta_keys = array(
+		wordbook_next_get_seo_description_meta_key(),
 		'seo_description',
 		'_seo_description',
 		'meta_description',
@@ -85,11 +180,7 @@ function wordbook_next_get_post_meta_description( $post = null ) {
 	$summary = wordbook_next_get_custom_meta_description( $post );
 
 	if ( '' === $summary ) {
-		$summary = wordbook_next_trim_meta_description( $post->post_excerpt );
-	}
-
-	if ( '' === $summary ) {
-		$summary = wordbook_next_trim_meta_description( $post->post_content );
+		$summary = wordbook_next_get_generated_post_meta_description( $post );
 	}
 
 	if ( '' !== $summary ) {
