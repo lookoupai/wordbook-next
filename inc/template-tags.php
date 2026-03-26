@@ -317,10 +317,8 @@ function wordbook_next_get_view_description() {
 		);
 	}
 
-	$description = get_the_archive_description();
-
-	if ( $description ) {
-		return $description;
+	if ( is_archive() && function_exists( 'wordbook_next_get_archive_meta_description' ) ) {
+		return wordbook_next_get_archive_meta_description();
 	}
 
 	if ( is_front_page() || is_home() ) {

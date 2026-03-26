@@ -140,6 +140,129 @@ function wordbook_next_get_generated_post_meta_description( $post = null ) {
 	return wordbook_next_trim_meta_description( get_bloginfo( 'description' ) );
 }
 
+function wordbook_next_get_archive_result_count() {
+	global $wp_query;
+
+	return isset( $wp_query->found_posts ) ? max( 0, (int) $wp_query->found_posts ) : 0;
+}
+
+function wordbook_next_get_archive_meta_description() {
+	$description = wordbook_next_trim_meta_description( get_the_archive_description() );
+
+	if ( '' !== $description ) {
+		return $description;
+	}
+
+	$count = wordbook_next_get_archive_result_count();
+
+	if ( is_category() ) {
+		return wordbook_next_trim_meta_description(
+			sprintf( '浏览分类“%s”下的内容列表，共 %d 篇。', single_cat_title( '', false ), $count )
+		);
+	}
+
+	if ( is_tag() ) {
+		return wordbook_next_trim_meta_description(
+			sprintf( '浏览标签“%s”相关内容，共 %d 篇。', single_term_title( '', false ), $count )
+		);
+	}
+
+	if ( is_tax() ) {
+		$term = get_queried_object();
+		$label = '专题';
+
+		if ( $term instanceof WP_Term ) {
+			$taxonomy = get_taxonomy( $term->taxonomy );
+			$label    = $taxonomy && ! empty( $taxonomy->labels->singular_name ) ? $taxonomy->labels->singular_name : $label;
+		}
+
+		return wordbook_next_trim_meta_description(
+			sprintf( '浏览%s“%s”相关内容，共 %d 篇。', $label, single_term_title( '', false ), $count )
+		);
+	}
+
+	if ( is_post_type_archive() ) {
+		$post_type = get_query_var( 'post_type' );
+		$post_type = is_array( $post_type ) ? reset( $post_type ) : $post_type;
+		$object    = is_string( $post_type ) ? get_post_type_object( $post_type ) : null;
+		$label     = $object && ! empty( $object->labels->name ) ? $object->labels->name : wordbook_next_get_view_title();
+
+		return wordbook_next_trim_meta_description(
+			sprintf( '浏览%s内容列表，共 %d 篇。', $label, $count )
+		);
+	}
+
+	if ( is_author() ) {
+		return wordbook_next_trim_meta_description(
+			sprintf( '浏览作者“%s”发布的内容，共 %d 篇。', wordbook_next_get_view_title(), $count )
+		);
+	}
+
+	if ( is_date() ) {
+		return wordbook_next_trim_meta_description(
+			sprintf( '浏览%s归档内容，共 %d 篇。', wordbook_next_get_view_title(), $count )
+		);
+	}
+
+	if ( is_archive() ) {
+		return wordbook_next_trim_meta_description(
+			sprintf( '浏览“%s”归档内容，共 %d 篇。', wordbook_next_get_view_title(), $count )
+		);
+	}
+
+	return wordbook_next_trim_meta_description( get_bloginfo( 'description' ) );
+}
+
+function wordbook_next_normalize_meta_image_url( $url ) {
+	$url = trim( (string) $url );
+
+	if ( '' === $url ) {
+		return '';
+	}
+
+	if ( 0 === strpos( $url, '//' ) ) {
+		$scheme = is_ssl() ? 'https:' : 'http:';
+		return esc_url_raw( $scheme . $url );
+	}
+
+	if ( 0 === strpos( $url, '/' ) ) {
+		return esc_url_raw( home_url( $url ) );
+	}
+
+	return esc_url_raw( $url );
+}
+
+function wordbook_next_get_content_image_data( $post = null ) {
+	$post = get_post( $post );
+
+	if ( ! $post instanceof WP_Post || '' === trim( (string) $post->post_content ) ) {
+		return array(
+			'url' => '',
+			'alt' => '',
+		);
+	}
+
+	$content = (string) $post->post_content;
+	$image   = array(
+		'url' => '',
+		'alt' => '',
+	);
+
+	if ( preg_match( '/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/iu', $content, $matches ) ) {
+		$image['url'] = wordbook_next_normalize_meta_image_url( $matches[1] );
+
+		if ( preg_match( '/<img[^>]+alt=["\']([^"\']*)["\'][^>]*>/iu', $matches[0], $alt_matches ) ) {
+			$image['alt'] = wordbook_next_normalize_meta_text( $alt_matches[1] );
+		}
+	}
+
+	if ( '' === $image['alt'] ) {
+		$image['alt'] = wordbook_next_normalize_meta_text( get_the_title( $post ) );
+	}
+
+	return $image;
+}
+
 function wordbook_next_get_custom_meta_description( $post = null ) {
 	$post = get_post( $post );
 
@@ -238,10 +361,8 @@ function wordbook_next_get_meta_description() {
 		);
 	}
 
-	$description = wordbook_next_trim_meta_description( get_the_archive_description() );
-
-	if ( '' !== $description ) {
-		return $description;
+	if ( is_archive() ) {
+		return wordbook_next_get_archive_meta_description();
 	}
 
 	return wordbook_next_trim_meta_description( get_bloginfo( 'description' ) );
@@ -305,6 +426,48 @@ function wordbook_next_get_meta_image() {
 		if ( $thumbnail_id ) {
 			$image['url'] = wp_get_attachment_image_url( $thumbnail_id, 'full' );
 			$image['alt'] = get_post_meta( $thumbnail_id, '_wp_attachment_image_alt', true ) ?: get_the_title( $post_id );
+		}
+	}
+
+	if ( '' === $image['url'] && $post_id ) {
+		$content_image = wordbook_next_get_content_image_data( $post_id );
+
+		if ( ! empty( $content_image['url'] ) ) {
+			$image = $content_image;
+		}
+	}
+
+	if ( '' === $image['url'] && ( is_archive() || ( is_home() && ! is_front_page() ) ) ) {
+		global $wp_query;
+
+		$posts = isset( $wp_query->posts ) && is_array( $wp_query->posts ) ? $wp_query->posts : array();
+
+		foreach ( $posts as $archive_post ) {
+			$archive_post = get_post( $archive_post );
+
+			if ( ! $archive_post instanceof WP_Post ) {
+				continue;
+			}
+
+			$thumbnail_id = get_post_thumbnail_id( $archive_post );
+
+			if ( ! $thumbnail_id ) {
+				$content_image = wordbook_next_get_content_image_data( $archive_post );
+
+				if ( ! empty( $content_image['url'] ) ) {
+					$image = $content_image;
+					break;
+				}
+
+				continue;
+			}
+
+			$image['url'] = wp_get_attachment_image_url( $thumbnail_id, 'full' );
+			$image['alt'] = get_post_meta( $thumbnail_id, '_wp_attachment_image_alt', true ) ?: get_the_title( $archive_post );
+
+			if ( $image['url'] ) {
+				break;
+			}
 		}
 	}
 
