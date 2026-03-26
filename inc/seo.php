@@ -46,6 +46,35 @@ function wordbook_next_trim_meta_description( $text, $width = 200 ) {
 	return trim( substr( $text, 0, $width ) );
 }
 
+function wordbook_next_get_custom_meta_description( $post = null ) {
+	$post = get_post( $post );
+
+	if ( ! $post instanceof WP_Post ) {
+		return '';
+	}
+
+	$meta_keys = array(
+		'seo_description',
+		'_seo_description',
+		'meta_description',
+		'_meta_description',
+		'_yoast_wpseo_metadesc',
+		'rank_math_description',
+		'_aioseo_description',
+	);
+
+	foreach ( $meta_keys as $meta_key ) {
+		$value = get_post_meta( $post->ID, $meta_key, true );
+		$value = wordbook_next_trim_meta_description( $value );
+
+		if ( '' !== $value ) {
+			return $value;
+		}
+	}
+
+	return '';
+}
+
 function wordbook_next_get_post_meta_description( $post = null ) {
 	$post = get_post( $post );
 
@@ -53,7 +82,11 @@ function wordbook_next_get_post_meta_description( $post = null ) {
 		return '';
 	}
 
-	$summary = wordbook_next_trim_meta_description( $post->post_excerpt );
+	$summary = wordbook_next_get_custom_meta_description( $post );
+
+	if ( '' === $summary ) {
+		$summary = wordbook_next_trim_meta_description( $post->post_excerpt );
+	}
 
 	if ( '' === $summary ) {
 		$summary = wordbook_next_trim_meta_description( $post->post_content );
@@ -96,6 +129,10 @@ function wordbook_next_get_meta_description() {
 
 	if ( is_singular() ) {
 		return wordbook_next_get_post_meta_description( get_queried_object_id() );
+	}
+
+	if ( is_404() ) {
+		return '你访问的页面不存在，可返回首页或使用站内搜索继续查找内容。';
 	}
 
 	if ( is_search() ) {
@@ -284,3 +321,12 @@ function wordbook_next_render_social_meta() {
 	}
 }
 add_action( 'wp_head', 'wordbook_next_render_social_meta', 2 );
+
+function wordbook_next_filter_robots_directives( array $robots ) {
+	if ( is_404() ) {
+		return wp_robots_no_robots( $robots );
+	}
+
+	return $robots;
+}
+add_filter( 'wp_robots', 'wordbook_next_filter_robots_directives', 20 );
