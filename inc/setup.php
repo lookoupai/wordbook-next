@@ -55,3 +55,32 @@ function wordbook_next_content_width() {
 	$GLOBALS['content_width'] = 840;
 }
 add_action( 'after_setup_theme', 'wordbook_next_content_width', 0 );
+
+function wordbook_next_get_listing_posts_per_page() {
+	return (int) apply_filters( 'wordbook_next_listing_posts_per_page', 12 );
+}
+
+function wordbook_next_adjust_listing_posts_per_page( $query ) {
+	if ( ! $query instanceof WP_Query || is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	if ( $query->is_feed() || $query->is_singular() ) {
+		return;
+	}
+
+	if ( $query->is_post_type_archive( 'product' ) || $query->is_tax( array( 'product_cat', 'product_tag' ) ) ) {
+		return;
+	}
+
+	if ( ! ( $query->is_home() || $query->is_archive() || $query->is_search() ) ) {
+		return;
+	}
+
+	$posts_per_page = wordbook_next_get_listing_posts_per_page();
+
+	if ( $posts_per_page > 0 ) {
+		$query->set( 'posts_per_page', $posts_per_page );
+	}
+}
+add_action( 'pre_get_posts', 'wordbook_next_adjust_listing_posts_per_page' );
